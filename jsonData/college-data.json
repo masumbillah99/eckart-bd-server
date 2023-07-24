@@ -1,6 +1,5 @@
 [
     {
-        "id": 11,
         "college_image": "https://suicidalbehaviourresearchlab.files.wordpress.com/2021/01/pexels-photo-2774556.jpeg",
         "college_logo": "https://upload.wikimedia.org/wikipedia/en/c/cb/Dhaka_University_logo.svg",
         "college_name": "University of Dhaka",
@@ -64,7 +63,6 @@
         "location": "Dhaka, Bangladesh"
     },
     {
-        "id": 12,
         "college_image": "https://optimise2.assets-servd.host/dm-group/production/images/In-School-Today_social.png?w=777&q=100&auto=format&fit=clip&dm=1668540981&s=2d990f5df384711d1cd84fb9c0ccc4d5",
         "college_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbBSJU2MUWMI6LZPBw9ft7qeW_CzWCWyHvL-I_qrCQ_s7z6cdy",
         "college_name": "Dhaka City College",
@@ -125,7 +123,6 @@
         "location": "Dhaka, Bangladesh"
     },
     {
-        "id": 13,
         "college_image": "https://static.best.eu.org/images/education/eoe_events.png",
         "college_logo": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Morogram_of_RAJUK_Uttara_Model_College.svg/640px-Morogram_of_RAJUK_Uttara_Model_College.svg.png",
         "college_name": "Rajuk Uttara Model College",
@@ -187,7 +184,6 @@
         "location": "Dhaka, Bangladesh"
     },
     {
-        "id": 14,
         "college_image": "https://optimise2.assets-servd.host/dm-group/production/images/In-School-Today_social.png?w=777&q=100&auto=format&fit=clip&dm=1668540981&s=2d990f5df384711d1cd84fb9c0ccc4d5",
         "college_logo": "https://www.duet.ac.bd/assets/frontend/img/duet-logo.png",
         "college_name": "Dhaka University of Engineering and Technology",
@@ -249,7 +245,6 @@
         "location": "Dhaka, Bangladesh"
     },
     {
-        "id": 15,
         "college_image": "https://education.github.com/assets/global_campus/global-campus-event-2-b5f86c8585ba89449b3aac628464636d463cc4c1906e2a2d89e7391a3949669a.jpg",
         "college_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsTTpeUUwqrk7BK-3peADQbhuik5ljoRCjueQUNpWemMRQ-5-B",
         "college_name": "Dhaka Polytechnic Institute",
@@ -311,7 +306,6 @@
         "location": "Dhaka, Bangladesh"
     },
     {
-        "id": 16,
         "college_image": "https://suicidalbehaviourresearchlab.files.wordpress.com/2021/01/pexels-photo-2774556.jpeg",
         "college_logo": "https://scontent.fcla4-1.fna.fbcdn.net/v/t1.18169-9/4440_92495437358_4977342_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=pZyiUz208VkAX-oMexg&_nc_ht=scontent.fcla4-1.fna&oh=00_AfC7qPMAIBFq4r73z_QKeK-IhZnbsJ77LOw24x6uP7bLGA&oe=64E55F88",
         "college_name": "Cumilla Polytechnic Institute",
