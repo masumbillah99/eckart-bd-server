@@ -36,6 +36,22 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
+    /** implement search system */
+    // creating index on two fields
+    const indexKeys = { college_name: 1 };
+    const indexOptions = { name: "collegeName" };
+    const result = await collegeCollection.createIndex(indexKeys, indexOptions);
+
+    app.get("/searchCollege/:text", async (req, res) => {
+      const searchText = req.params.text;
+      const result = await collegeCollection
+        .find({
+          $or: [{ college_name: { $regex: searchText, $options: "i" } }],
+        })
+        .toArray();
+      res.send(result);
+    });
+
     /**  college data route api */
     app.get("/colleges", async (req, res) => {
       const result = await collegeCollection.find().toArray();
