@@ -4,7 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.og57wk2.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.og57wk2.mongodb.net/?retryWrites=true&w=majority`;
 
 // MIDDLEWARE
 app.use(cors());
@@ -21,7 +21,13 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const usersCollection = client.db("hat-bazar-next").collection("users");
+    const usersCollection = client.db(process.env.DB_USER).collection("users");
+    const productsCollection = client
+      .db(process.env.DB_USER)
+      .collection("all-products");
+    const categoryCollection = client
+      .db(process.env.DB_USER)
+      .collection("product-category");
 
     // get user role form db
     app.get("/users-role/:email", async (req, res) => {
@@ -40,6 +46,25 @@ async function run() {
       const updateDoc = { $set: user };
       const options = { upsert: true };
       const result = await usersCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
+
+    /** -------- product apis --------- */
+    app.get("/product-categories", async (req, res) => {
+      const result = await categoryCollection.find().toArray({});
+      if (!result) {
+        return res.send({
+          error: true,
+          message: "Product categories not found",
+        });
+      }
+      res.send(result);
+    });
+
+    // add-product in db
+    app.post("/add-product", async (req, res) => {
+      const productData = req.body;
+      const result = await productsCollection.insertOne(productData);
       res.send(result);
     });
 
