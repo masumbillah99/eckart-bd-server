@@ -50,6 +50,41 @@ async function run() {
     });
 
     /** -------- product apis --------- */
+    // add-product in db
+    app.post("/add-product", async (req, res) => {
+      const productData = req.body;
+      const result = await productsCollection.insertOne(productData);
+      res.send(result);
+    });
+
+    // get product from db
+    app.get("/all-product-data", async (req, res) => {
+      const result = await productsCollection.find().toArray({});
+      res.send(result);
+    });
+
+    // single product details
+    app.get("/product-details/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productsCollection.findOne(query);
+      res.send(result);
+    });
+
+    // get products by category
+    app.get("/category-products/:path", async (req, res) => {
+      const allProducts = await productsCollection.find().toArray({});
+      const path = req.params.path;
+      if (path === 0) {
+        res.send(allProducts);
+      }
+      const categoryProducts = allProducts.filter(
+        (cate) => cate?.category?.value === path
+      );
+      res.send(categoryProducts);
+    });
+
+    // get categories
     app.get("/product-categories", async (req, res) => {
       const result = await categoryCollection.find().toArray({});
       if (!result) {
@@ -58,13 +93,6 @@ async function run() {
           message: "Product categories not found",
         });
       }
-      res.send(result);
-    });
-
-    // add-product in db
-    app.post("/add-product", async (req, res) => {
-      const productData = req.body;
-      const result = await productsCollection.insertOne(productData);
       res.send(result);
     });
 
