@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const SSLCommerzPayment = require("sslcommerz-lts");
+const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY);
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -57,7 +58,8 @@ async function run() {
       res.send(result);
     });
 
-    /** payment apis */
+    /** ------------ payment apis ------------ */
+    // payment with ssl-commerz
     app.post("/payment-request", async (req, res) => {
       const orderBody = req.body;
       const transactionId = new ObjectId().toString();
@@ -68,9 +70,9 @@ async function run() {
         currency: orderBody.currency,
         // use unique tran_id for each api call
         tran_id: transactionId,
-        success_url: `http://localhost:5000/payment-success/${transactionId}`,
-        fail_url: "http://localhost:3030/fail",
-        cancel_url: "http://localhost:3030/cancel",
+        success_url: `${process.env.SERVER_URL}/payment-success/${transactionId}`,
+        fail_url: `${process.env.SERVER_URL}/payment-failed/${transactionId}`,
+        cancel_url: `${process.env.SERVER_URL}/payment-cancel`,
         ipn_url: "http://localhost:3030/ipn",
         shipping_method: "Courier",
         product_name: "Computer.",
@@ -109,21 +111,72 @@ async function run() {
         };
         const result = ordersCollection.insertOne(finalOrder);
       });
+
+      // payment success
       app.post("/payment-success/:transId", async (req, res) => {
-        // console.log(req.params.transId);
         const result = await ordersCollection.updateOne(
           {
             transactionId: req.params.transId,
           },
           { $set: { paidStatus: true } }
         );
-        console.log(result);
         if (result.modifiedCount > 0) {
           res.redirect(
-            `${process.env.CLIENT_URL}/cart/shipping/payment/${req.params.transId}`
+            `${process.env.CLIENT_URL}/payment/success/${req.params.transId}`
           );
         }
       });
+
+      // payment fail
+      app.post("/payment-failed/:transId", async (req, res) => {
+        const query = { transactionId: req.params.transId };
+        const result = await ordersCollection.deleteOne(query);
+        if (result.deletedCount) {
+          res.redirect(
+            `${process.env.CLIENT_URL}/payment/failed/${req.params.transId}`
+          );
+        }
+      });
+    });
+
+    // card payment request
+    app.post("/create-payment-intent", async (req, res) => {
+      const { totalPrice, currency } = req.body;
+      if (totalPrice) {
+        const amount = parseFloat(totalPrice) * 100;
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amount,
+          currency: currency,
+          payment_method_types: ["card"],
+        });
+        res.send({ clientSecret: paymentIntent.client_secret });
+      }
+    });
+
+    // store card payment data
+    app.post("/save-card-payment", async (req, res) => {
+      const result = await ordersCollection.insertOne(req.body);
+      res.send(result);
+    });
+
+    // get payment data
+    app.get("/user-orders", async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        return res
+          .status(403)
+          .json({ error: true, message: "Forbidden Access" });
+      }
+      const query = {
+        "orderBody.consumerInfo.email": email,
+      };
+      const result = await ordersCollection.find(query).toArray({});
+      res.send(result);
+    });
+
+    app.get("/all-orders", async (req, res) => {
+      const result = await ordersCollection.find().toArray({});
+      res.send(result);
     });
 
     /** -------- product apis --------- */
