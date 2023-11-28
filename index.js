@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const SSLCommerzPayment = require("sslcommerz-lts");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -19,6 +20,10 @@ const client = new MongoClient(uri, {
   },
 });
 
+const store_id = process.env.SSL_STORE_ID;
+const store_passwd = process.env.SSL_STORE_PASS;
+const is_live = false; // true for live, false for sandbox
+
 async function run() {
   try {
     const usersCollection = client.db(process.env.DB_USER).collection("users");
@@ -28,6 +33,9 @@ async function run() {
     const categoryCollection = client
       .db(process.env.DB_USER)
       .collection("product-category");
+    const ordersCollection = client
+      .db(process.env.DB_USER)
+      .collection("orders");
 
     // get user role form db
     app.get("/users-role/:email", async (req, res) => {
@@ -47,6 +55,75 @@ async function run() {
       const options = { upsert: true };
       const result = await usersCollection.updateOne(query, updateDoc, options);
       res.send(result);
+    });
+
+    /** payment apis */
+    app.post("/payment-request", async (req, res) => {
+      const orderBody = req.body;
+      const transactionId = new ObjectId().toString();
+      // console.log(orderBody);
+
+      const sslData = {
+        total_amount: orderBody.totalPrice,
+        currency: orderBody.currency,
+        // use unique tran_id for each api call
+        tran_id: transactionId,
+        success_url: `http://localhost:5000/payment-success/${transactionId}`,
+        fail_url: "http://localhost:3030/fail",
+        cancel_url: "http://localhost:3030/cancel",
+        ipn_url: "http://localhost:3030/ipn",
+        shipping_method: "Courier",
+        product_name: "Computer.",
+        product_category: "Electronic",
+        product_profile: "general",
+        cus_name: orderBody.consumerInfo?.name,
+        cus_email: orderBody.consumerInfo?.email,
+        cus_add1: orderBody.consumerInfo?.address,
+        cus_add2: "Dhaka",
+        cus_city: "Dhaka",
+        cus_state: "Dhaka",
+        cus_postcode: "1000",
+        cus_country: "Bangladesh",
+        cus_phone: "01711111111",
+        cus_fax: "01711111111",
+        ship_name: "Customer Name",
+        ship_add1: "Dhaka",
+        ship_add2: "Dhaka",
+        ship_city: "Dhaka",
+        ship_state: "Dhaka",
+        ship_postcode: 1000,
+        ship_country: "Bangladesh",
+      };
+
+      // console.log(sslData);
+      const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+      sslcz.init(sslData).then((apiResponse) => {
+        // Redirect the user to payment gateway
+        let GatewayPageURL = apiResponse.GatewayPageURL;
+        res.send({ url: GatewayPageURL });
+
+        const finalOrder = {
+          orderBody,
+          transactionId,
+          paidStatus: false,
+        };
+        const result = ordersCollection.insertOne(finalOrder);
+      });
+      app.post("/payment-success/:transId", async (req, res) => {
+        // console.log(req.params.transId);
+        const result = await ordersCollection.updateOne(
+          {
+            transactionId: req.params.transId,
+          },
+          { $set: { paidStatus: true } }
+        );
+        console.log(result);
+        if (result.modifiedCount > 0) {
+          res.redirect(
+            `${process.env.CLIENT_URL}/cart/shipping/payment/${req.params.transId}`
+          );
+        }
+      });
     });
 
     /** -------- product apis --------- */
