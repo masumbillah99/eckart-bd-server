@@ -201,6 +201,34 @@ async function run() {
       res.send(result);
     });
 
+    // popular products
+    app.get("/popular-collection", async (req, res) => {
+      const cursor = { "popularity.value": "popular" };
+      const result = await productsCollection.find(cursor).toArray();
+      res.send(result);
+    });
+
+    // trending products
+    app.get("/trending-collection", async (req, res) => {
+      const cursor = { "popularity.value": "trending" };
+      const result = await productsCollection.find(cursor).toArray();
+      res.send(result);
+    });
+
+    // hot deals products
+    app.get("/hot-deals-collection", async (req, res) => {
+      const cursor = { "popularity.value": "hotDeals" };
+      const result = await productsCollection.find(cursor).toArray();
+      res.send(result);
+    });
+
+    // best seller products
+    app.get("/best-seller-collection", async (req, res) => {
+      const cursor = { "popularity.value": "bestSeller" };
+      const result = await productsCollection.find(cursor).toArray();
+      res.send(result);
+    });
+
     // get products by category
     app.get("/category-products/:path", async (req, res) => {
       const allProducts = await productsCollection.find().toArray({});
@@ -239,9 +267,9 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Hat Bazar Server is sitting");
+  res.send(`<h1>WELCOME TO ECKART-BD SERVER</h1>`);
 });
 
 app.listen(port, () => {
-  console.log(`Hat-Bazar Server is on port: ${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });
