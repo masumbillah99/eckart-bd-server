@@ -37,6 +37,9 @@ async function run() {
     const ordersCollection = client
       .db(process.env.DB_USER)
       .collection("orders");
+    const wishListCollection = client
+      .db(process.env.DB_USER)
+      .collection("wish-list");
 
     // get user role form db
     app.get("/users-role/:email", async (req, res) => {
@@ -184,6 +187,16 @@ async function run() {
     app.post("/add-product", async (req, res) => {
       const productData = req.body;
       const result = await productsCollection.insertOne(productData);
+      res.send(result);
+    });
+
+    // create wish list
+    app.post("/add-to-wishlist", async (req, res) => {
+      const productData = req.body;
+      if (productData._id) {
+        return res.send({ message: "Already add in wish list" });
+      }
+      const result = await wishListCollection.insertOne(productData);
       res.send(result);
     });
 
